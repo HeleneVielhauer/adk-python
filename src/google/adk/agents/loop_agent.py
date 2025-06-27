@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 from typing import AsyncGenerator
+from typing import cast
 from typing import Optional
 
 from typing_extensions import override
@@ -39,6 +40,23 @@ class LoopAgent(BaseAgent):
   If not set, the loop agent will run indefinitely until a sub-agent
   escalates.
   """
+
+  @override
+  def clone(self, name: Optional[str] = None) -> LoopAgent:
+    """Creates a deep copy of this LoopAgent instance.
+
+    The cloned agent will have no parent and cloned sub-agents to avoid the restriction
+    where an agent can only be a sub-agent once.
+
+    Args:
+      name: Optional new name for the cloned agent. If not provided, the original
+        name will be used with a suffix to ensure uniqueness.
+
+    Returns:
+      A new LoopAgent instance with identical configuration but with
+      no parent and cloned sub-agents.
+    """
+    return cast(LoopAgent, super().clone(name))
 
   @override
   async def _run_async_impl(

@@ -18,6 +18,8 @@ from __future__ import annotations
 
 import asyncio
 from typing import AsyncGenerator
+from typing import cast
+from typing import Optional
 
 from typing_extensions import override
 
@@ -91,6 +93,23 @@ class ParallelAgent(BaseAgent):
   - Running different algorithms simultaneously.
   - Generating multiple responses for review by a subsequent evaluation agent.
   """
+
+  @override
+  def clone(self, name: Optional[str] = None) -> ParallelAgent:
+    """Creates a deep copy of this ParallelAgent instance.
+
+    The cloned agent will have no parent and cloned sub-agents to avoid the restriction
+    where an agent can only be a sub-agent once.
+
+    Args:
+      name: Optional new name for the cloned agent. If not provided, the original
+        name will be used with a suffix to ensure uniqueness.
+
+    Returns:
+      A new ParallelAgent instance with identical configuration but with
+      no parent and cloned sub-agents.
+    """
+    return cast(ParallelAgent, super().clone(name))
 
   @override
   async def _run_async_impl(

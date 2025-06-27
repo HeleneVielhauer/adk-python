@@ -20,6 +20,7 @@ from typing import Any
 from typing import AsyncGenerator
 from typing import Awaitable
 from typing import Callable
+from typing import cast
 from typing import Literal
 from typing import Optional
 from typing import Union
@@ -515,6 +516,22 @@ class LlmAgent(BaseAgent):
           'Response schema must be set via LlmAgent.output_schema.'
       )
     return generate_content_config
+
+  @override
+  def clone(self, name: Optional[str] = None) -> LlmAgent:
+    """Creates a deep copy of this LlmAgent instance.
+
+    The cloned agent will have no parent and no sub-agents to avoid the restriction
+    where an agent can only be a sub-agent once.
+
+    Args:
+      name: Optional new name for the cloned agent. If not provided, the original
+        name will be used with a suffix to ensure uniqueness.
+
+    Returns:
+      A new LlmAgent instance with identical configuration but no parent or sub-agents.
+    """
+    return cast(LlmAgent, super().clone(name))
 
 
 Agent: TypeAlias = LlmAgent
