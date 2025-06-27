@@ -14,6 +14,7 @@
 
 from __future__ import annotations
 
+import copy
 import inspect
 from typing import Any
 from typing import AsyncGenerator
@@ -120,6 +121,33 @@ class BaseAgent(BaseModel):
       When the content is present, the provided content will be used as agent
       response and appended to event history as agent response.
   """
+
+  def clone(self, name: Optional[str] = None) -> BaseAgent:
+    """Creates a deep copy of this agent instance.
+
+    The cloned agent will have no parent and cloned sub-agents to avoid the restriction
+    where an agent can only be a sub-agent once.
+
+    Args:
+      name: Optional new name for the cloned agent. If not provided, the original
+        name will be used with a suffix to ensure uniqueness.
+
+    Returns:
+      A new instance of the same agent class with identical configuration but with
+      no parent and cloned sub-agents.
+    """
+    cloned_agent = copy.deepcopy(self)
+
+    # Reset parent and clone sub-agents to avoid having the same agent object in
+    # the tree twice
+    cloned_agent.parent_agent = None
+    cloned_agent.sub_agents = [
+        sub_agent.clone() for sub_agent in self.sub_agents
+    ]
+
+    cloned_agent.name = name or f'{self.name}_clone'
+
+    return cloned_agent
 
   @final
   async def run_async(

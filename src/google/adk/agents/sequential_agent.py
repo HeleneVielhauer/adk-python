@@ -17,6 +17,8 @@
 from __future__ import annotations
 
 from typing import AsyncGenerator
+from typing import cast
+from typing import Optional
 
 from typing_extensions import override
 
@@ -28,6 +30,23 @@ from .llm_agent import LlmAgent
 
 class SequentialAgent(BaseAgent):
   """A shell agent that runs its sub-agents in sequence."""
+
+  @override
+  def clone(self, name: Optional[str] = None) -> SequentialAgent:
+    """Creates a deep copy of this SequentialAgent instance.
+
+    The cloned agent will have no parent and cloned sub-agents to avoid the restriction
+    where an agent can only be a sub-agent once.
+
+    Args:
+      name: Optional new name for the cloned agent. If not provided, the original
+        name will be used with a suffix to ensure uniqueness.
+
+    Returns:
+      A new SequentialAgent instance with identical configuration but with
+      no parent and cloned sub-agents.
+    """
+    return cast(SequentialAgent, super().clone(name))
 
   @override
   async def _run_async_impl(

@@ -14,12 +14,20 @@
 
 from __future__ import annotations
 
+import asyncio
+import copy
 import json
 import logging
+import os
 from pathlib import Path
+import time
 from typing import Any
 from typing import AsyncGenerator
+from typing import Awaitable
+from typing import Callable
+from typing import cast
 from typing import Optional
+from typing import TYPE_CHECKING
 from typing import Union
 from urllib.parse import urlparse
 import uuid
@@ -48,6 +56,7 @@ except ImportError as e:
 
 from google.genai import types as genai_types
 import httpx
+from typing_extensions import override
 
 from ..a2a.converters.event_converter import convert_a2a_message_to_event
 from ..a2a.converters.event_converter import convert_a2a_task_to_event
@@ -150,6 +159,23 @@ class RemoteA2aAgent(BaseAgent):
           "agent_card must be AgentCard, URL string, or file path string, "
           f"got {type(agent_card)}"
       )
+
+  @override
+  def clone(self, name: Optional[str] = None) -> "RemoteA2aAgent":
+    """Creates a deep copy of this RemoteA2aAgent instance.
+
+    The cloned agent will have no parent and cloned sub-agents to avoid the restriction
+    where an agent can only be a sub-agent once.
+
+    Args:
+      name: Optional new name for the cloned agent. If not provided, the original
+        name will be used with a suffix to ensure uniqueness.
+
+    Returns:
+      A new RemoteA2aAgent instance with identical configuration but with
+      no parent and cloned sub-agents.
+    """
+    return cast(RemoteA2aAgent, super().clone(name))
 
   async def _ensure_httpx_client(self) -> httpx.AsyncClient:
     """Ensure HTTP client is available and properly configured."""
